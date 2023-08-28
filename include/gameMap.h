@@ -30,12 +30,19 @@ private:
     int peerX_;
     int peerY_;
     WINDOW* win;
+    void handlerEnd();
+    void handlerEnd(const std::string& msg);
+    void handlerMove(const std::string& msg);
+    void handlerGenerate(const std::string& msg);
     char locChar(int x, int y) const { return map_[x][y]; }
     bool check(int ch);
     int score_;
+    int peerScore_;
     EventLoop loop_;
     TcpClient tcpClient_;
-    std::pair<int, int> parseLocation(const std::string& msg);
+    std::pair<int, int> parse(const std::string& msg);
+    timeval time_;
+    long long curTime_;
 };
 
 #endif //GAME_GAMEMAP_H

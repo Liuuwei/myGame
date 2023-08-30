@@ -19,8 +19,9 @@ public:
     void show();
     void move();
     void setChar(int x, int y, char c);
-    void readCallback(const std::shared_ptr<TcpConnection>& conn, Buffer* buffer);
-    void writeCallback(const std::shared_ptr<TcpConnection>& conn, Buffer* buffer);
+    void setClient(TcpClient* client) { client_ = client; }
+    void handler(const std::string& msg);
+    void setTag(char tag) { tag_ = tag; }
 private:
     std::vector<std::string> map_;
     int lines_;
@@ -29,17 +30,19 @@ private:
     int y_;
     int peerX_;
     int peerY_;
+    TcpClient* client_;
     WINDOW* win;
     void handlerEnd();
     void handlerEnd(const std::string& msg);
-    void handlerMove(const std::string& msg);
-    void handlerGenerate(const std::string& msg);
+    void clearLoc();
+    void updateLoc();
+    void handlerGenerate(int x, int y);
     char locChar(int x, int y) const { return map_[x][y]; }
     bool check(int ch);
     int score_;
     int peerScore_;
     EventLoop loop_;
-    TcpClient tcpClient_;
+    char tag_;
     std::pair<int, int> parse(const std::string& msg);
     timeval time_;
     long long curTime_;

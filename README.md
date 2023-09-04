@@ -1,4 +1,7 @@
-安装  
+## 依赖  
+WebServer库  
+ncurses库  
+## 安装  
 ```c++
     mkdir build
     cd build

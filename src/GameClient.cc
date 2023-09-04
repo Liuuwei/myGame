@@ -5,8 +5,6 @@
 #include "Player.h"
 #include "NonPlayer.h"
 
-#include <fstream>
-
 GameClient::GameClient(EventLoop *loop, const std::string &ip, int port) : loop_(loop), client_(loop_, ip, port),
                                                                             myself_(nullptr),
                                                                             map_(DEFAULT_LINES, std::vector<char>(DEFAULT_COLS, ' ')),
@@ -28,6 +26,7 @@ void GameClient::start() {
     client_.setReadCallback([this](auto && PH1, auto && PH2) {
         onMessage(std::forward<decltype(PH1)>(PH1), std::forward<decltype(PH2)>(PH2));
     });
+    client_.closeNagle();
     client_.connect();
 }
 
@@ -35,18 +34,19 @@ void GameClient::onConnection(const std::shared_ptr<TcpConnection> &conn) {
     show();
     move();
 //    int i = 0;
+//    char op[4] = {'w', 's', 'a', 'd'};
 //    while (true) {
 //        sleep(1);
-//        char op[4] = {'w', 'a', 's', 'd'};
 //        char c = op[i];
 //        i = (i + 1) % 4;
-//        client_.send(std::string(1, 'a') + c + "\r\n\r\n");
+//        std::cout << "send " << std::endl;
+//        conn->send(std::string(1, 'a') + c + "\r\n\r\n");
 //    }
 }
 
 void GameClient::onMessage(const std::shared_ptr<TcpConnection> & conn, Buffer *buffer) {
-    int n = buffer->FindEnd();
-    if (n != -1) {
+    int n = -1;
+    while ( (n = buffer->FindEnd()) != -1) {
         std::string msg = buffer->retriveSome(n - buffer->readIndex() + 1);
         if (msg[0] == 'T') {
             auto tag = msg[3];

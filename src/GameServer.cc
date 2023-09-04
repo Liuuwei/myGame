@@ -18,6 +18,7 @@ void GameServer::start() {
     server_.setOnConnection([this](auto && PH1) {
         onConnection(std::forward<decltype(PH1)>(PH1));
     });
+    server_.closeNagle();
     server_.start();
 }
 
@@ -43,6 +44,7 @@ void GameServer::onMessage(const std::shared_ptr<TcpConnection> &conn, Buffer *b
         auto& curPlayer = players_[tag];
         if (move(curPlayer, op)) {
             std::string str = curPlayer.tag() + std::to_string(curPlayer.x()) + ":" + std::to_string(curPlayer.y()) + "\r\n\r\n";
+            std::cout << str << std::endl;
             auto& allPlayer = conn->loop()->tcpConnections();
             for (const auto& it : allPlayer) {
                 auto player = it.second.lock();

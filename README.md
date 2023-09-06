@@ -28,6 +28,7 @@ ncurses库
 9.6-15:36:
 完成游戏功能，完成Player类，修改GameServer，修改GameClient
 实现了多人在线绘画的功能，每个人可以实时看到别人的画
-```
-## 展示
+```  
+
+## 展示  
 ![](http://6iu5ei.com/gameshow.jpg)

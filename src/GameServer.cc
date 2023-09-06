@@ -27,13 +27,13 @@ void GameServer::onConnection(const std::shared_ptr<TcpConnection> &conn) {
     int window = newPlayer();
     Player newPlayer(1, 1, '.', window, Insert);
     players_[conn->fd()] = newPlayer;
-    conn->send("TAG" + std::to_string(window) + "\r\n\r\n");
+    std::string str = newPlayer.String() + "\r\n\r\n";
+    allCommands_.push_back(str);
     for (const auto& command : allCommands_) {
         conn->send(command);
     }
 
     auto allPlayers = conn->loop()->tcpConnections();
-    std::string str = newPlayer.String() + "\r\n\r\n";
     for (const auto& it : allPlayers) {
         auto player = it.second.lock();
         if (player) {
@@ -49,8 +49,9 @@ void GameServer::onMessage(const std::shared_ptr<TcpConnection> &conn, Buffer *b
         char op = msg[0];
         auto& curPlayer = players_[conn->fd()];
         if (move(curPlayer, op)) {
-            auto allPlayers = conn->loop()->tcpConnections();
             std::string str = curPlayer.String() + "\r\n\r\n";
+            std::cout << str << std::endl;
+            auto allPlayers = conn->loop()->tcpConnections();
             allCommands_.push_back(str);
             for (auto& it : allPlayers) {
                 auto player = it.second.lock();

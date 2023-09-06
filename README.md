@@ -3,15 +3,21 @@
 tinymuduo库  
 ncurses库
 ```  
-## 安装  
+## 安装
 ```
-    mkdir build
-    cd build
-    cmake ..
-    make
-    cd ../bin
-    ./server
-    ./client
+mkdir build
+cd build
+cmake ..
+make
+```
+## 使用
+```
+test目录下有服务端和客户端的使用代码，需要修改一下ip和端口号
+cmake之后可执行文件在bin目录下
+./server
+./client
+操作说明:
+WASD移动，I绘画模式，C橡皮擦模式，L观察模式
 ```
 ## 更新日志
 ```
@@ -30,5 +36,5 @@ ncurses库
 实现了多人在线绘画的功能，每个人可以实时看到别人的画
 ```  
 
-## 展示  
-![](/Users/liuwei/CLionProjects/game/show/gameshow.jpg)
+## 展示
+![](https://github.com/Liuuwei/myGame/blob/main/show/gameshow.jpg?raw=true)

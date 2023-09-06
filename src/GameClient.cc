@@ -18,18 +18,12 @@ GameClient::GameClient(EventLoop *loop, const std::string &ip, int port) : loop_
     int t = 0;
     for (int i = 0; i < 2; i++) {
         for (int j = 0; j < 2; j++) {
-            windows_[t] = newwin(lines, cols, lines * i, cols * j);
-            box(windows_[t], ACS_VLINE, ACS_HLINE);
-            wrefresh(windows_[t]);
-            t++;
+            windows_[t++] = newwin(lines, cols, lines * i, cols * j);
         }
     }
 }
 
 GameClient::~GameClient() {
-    if (myself_) {
-        delete myself_;
-    }
     endwin();
 }
 
@@ -53,28 +47,27 @@ void GameClient::onMessage(const std::shared_ptr<TcpConnection> & conn, Buffer *
     int n = -1;
     while ( (n = buffer->FindEnd()) != -1) {
         std::string msg = buffer->retriveSome(n - buffer->readIndex() + 1);
-        if (msg[0] == 'T') { // 第一接受到信息，创建myself_
-            int window = msg[3] - '0';
-            myself_ = new Player(1, 1, '.', window, Insert);
-            show(*myself_);
+        auto window = msg[0] - '0';
+        auto model = static_cast<Model>(msg[1] - '0');
+        auto tag = msg[2];
+        auto [x, y] = parse(msg);
+
+        if (allPlayers_.find(window) == allPlayers_.end()) {
+            allPlayers_[window] = Player(x, y, '.', window, model);
+        }
+
+        auto& player = allPlayers_[window];
+        player.setWindow(window);
+        player.setModel(model);
+        player.setTag(tag);
+        player.setX(x);
+        player.setY(y);
+        show(player);
+
+        static bool first = true;
+        if (first) {
             start_.release();
-        } else {
-            auto window = msg[0] - '0';
-            auto model = static_cast<Model>(msg[1] - '0');
-            auto tag = msg[2];
-            auto [x, y] = parse(msg);
-
-            if (allPlayers_.find(window) == allPlayers_.end()) {
-                allPlayers_[window] = Player(x, y, '.', window, model);
-            }
-
-            auto& player = allPlayers_[window];
-            player.setWindow(window);
-            player.setModel(model);
-            player.setTag(tag);
-            player.setX(x);
-            player.setY(y);
-            show(player);
+            first = false;
         }
     }
 }
@@ -85,6 +78,7 @@ void GameClient::show(const Player& player) {
     Model model = player.model();
     int x = player.x();
     int y = player.y();
+
     switch (model) {
         case Insert: {
             mvwaddch(windows_[window], x, y, tag);

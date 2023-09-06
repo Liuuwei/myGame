@@ -1,7 +1,14 @@
+## 项目介绍
+```
+联网同屏绘画游戏
+在Linux终端上进行绘画
+每个人可以实时看到他人的绘画
+```
 ## 依赖
 ```
-tinymuduo库  
-ncurses库
+Linux操作系统
+我的另一个项目: tinymuduo网络库: github.com/Liuuwei/tinymuduo  
+终端绘制: ncurses库: 
 ```  
 ## 安装
 ```

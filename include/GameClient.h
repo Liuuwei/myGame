@@ -6,6 +6,7 @@
 #define GAME_GAMECLIENT_H
 
 #include <ncurses.h>
+#include <semaphore>
 
 #include <my/EventLoop.h>
 #include <my/TcpClient.h>
@@ -28,11 +29,14 @@ private:
     WINDOW* win;
     void onConnection(const std::shared_ptr<TcpConnection>&);
     void onMessage(const std::shared_ptr<TcpConnection>&, Buffer*);
-    void show();
+    void send(char op);
+    void show(const Player& player);
     void move();
     std::pair<int, int> parse(const std::string&);
     std::vector<std::vector<char>> map_;
-    std::unordered_map<char, Player> otherPlayers_;
+    std::unordered_map<int, Player> allPlayers_;
+    std::binary_semaphore start_;
+    std::vector<WINDOW *> windows_;
 };
 
 #endif //GAME_GAMECLIENT_H

@@ -7,15 +7,29 @@
 
 GameClient::GameClient(EventLoop *loop, const std::string &ip, int port) : loop_(loop), client_(loop_, ip, port),
                                                                             myself_(nullptr),
-                                                                            map_(DEFAULT_LINES, std::vector<char>(DEFAULT_COLS, ' ')),
-                                                                            win(nullptr) {
+                                                                            win(nullptr),
+                                                                            start_(0),
+                                                                            windows_(4)
+                                                                            {
     initscr();
     keypad(stdscr, TRUE);
     noecho();
-    win = newwin(DEFAULT_LINES, DEFAULT_COLS, 0, 0);
+
+    int t = 0;
+    for (int i = 0; i < 2; i++) {
+        for (int j = 0; j < 2; j++) {
+            windows_[t] = newwin(lines, cols, lines * i, cols * j);
+            box(windows_[t], ACS_VLINE, ACS_HLINE);
+            wrefresh(windows_[t]);
+            t++;
+        }
+    }
 }
 
 GameClient::~GameClient() {
+    if (myself_) {
+        delete myself_;
+    }
     endwin();
 }
 
@@ -31,82 +45,112 @@ void GameClient::start() {
 }
 
 void GameClient::onConnection(const std::shared_ptr<TcpConnection> &conn) {
-    show();
+    start_.acquire();
     move();
-//    int i = 0;
-//    char op[4] = {'w', 's', 'a', 'd'};
-//    while (true) {
-//        sleep(1);
-//        char c = op[i];
-//        i = (i + 1) % 4;
-//        std::cout << "send " << std::endl;
-//        conn->send(std::string(1, 'a') + c + "\r\n\r\n");
-//    }
 }
 
 void GameClient::onMessage(const std::shared_ptr<TcpConnection> & conn, Buffer *buffer) {
     int n = -1;
     while ( (n = buffer->FindEnd()) != -1) {
         std::string msg = buffer->retriveSome(n - buffer->readIndex() + 1);
-        if (msg[0] == 'T') {
-            auto tag = msg[3];
-            myself_ = new Player(1, 1, tag);
-            map_[myself_->x()][myself_->y()] = tag;
+        if (msg[0] == 'T') { // 第一接受到信息，创建myself_
+            int window = msg[3] - '0';
+            myself_ = new Player(1, 1, '.', window, Insert);
+            show(*myself_);
+            start_.release();
         } else {
-            auto tag = msg[0];
+            auto window = msg[0] - '0';
+            auto model = static_cast<Model>(msg[1] - '0');
+            auto tag = msg[2];
             auto [x, y] = parse(msg);
-            if (tag == myself_->tag()) {
-                map_[myself_->x()][myself_->y()] = ' ';
-                myself_->setX(x);
-                myself_->setY(y);
-                map_[myself_->x()][myself_->y()] = myself_->tag();
-            } else {
-                if (otherPlayers_.find(tag) != otherPlayers_.end()) { // 如果不是新玩家，需要先清除原本位置
-                    map_[otherPlayers_[tag].x()][otherPlayers_[tag].y()] = ' ';
-                    otherPlayers_[tag].setX(x);
-                    otherPlayers_[tag].setY(y);
-                } else {
-                    otherPlayers_[tag] = Player(x, y, tag);
-                }
-                map_[otherPlayers_[tag].x()][otherPlayers_[tag].y()] = tag;
+
+            if (allPlayers_.find(window) == allPlayers_.end()) {
+                allPlayers_[window] = Player(x, y, '.', window, model);
             }
+
+            auto& player = allPlayers_[window];
+            player.setWindow(window);
+            player.setModel(model);
+            player.setTag(tag);
+            player.setX(x);
+            player.setY(y);
+            show(player);
         }
-        show();
     }
 }
 
-void GameClient::show() {
-    for (int i = 0; i < map_.size(); i++) {
-        for (int j = 0; j < map_[0].size(); j++) {
-            mvwaddch(win, i, j , map_[i][j]);
+void GameClient::show(const Player& player) {
+    int window = player.window();
+    char tag = player.tag();
+    Model model = player.model();
+    int x = player.x();
+    int y = player.y();
+    switch (model) {
+        case Insert: {
+            mvwaddch(windows_[window], x, y, tag);
+            break;
+        }
+        case Clean: {
+            mvwaddch(windows_[window], x, y, ' ');
+            break;
+        }
+        case Look: {
+            wmove(windows_[window], x, y);
+            break;
+        }
+        default: {
+            break;
         }
     }
-    box(win, ACS_VLINE, ACS_HLINE);
-    wrefresh(win);
+    box(windows_[window], ACS_VLINE, ACS_HLINE);
+    wrefresh(windows_[window]);
 }
 
 void GameClient::move() {
-    int ch;
-    while ((ch = getch()) != KEY_F(1)) {
-        std::string op;
-        if (ch == 'w') {
-            op = "w";
-        } else if (ch == 's') {
-            op = "s";
-        } else if (ch == 'a') {
-            op = "a";
-        } else if (ch == 'd') {
-            op = "d";
-        } else {
-            continue;
+    int key;
+    while ((key = getch()) != KEY_F(1)) {
+        char op;
+        switch (key) {
+            case 'i': {
+                op = 'i';
+                break;
+            }
+            case 'c': {
+                op = 'c';
+                break;
+            }
+            case 'l': {
+                op = 'l';
+                break;
+            }
+            case 'w': {
+                op = 'w';
+                break;
+            }
+            case 's': {
+                op = 's';
+                break;
+            }
+            case 'a': {
+                op = 'a';
+                break;
+            }
+            case 'd': {
+                op = 'd';
+                break;
+            }
+            default: {
+                continue;
+            }
         }
-        client_.send(myself_->tag() + op + "\r\n\r\n");
+        client_.send(std::string(1, op) + "\r\n\r\n");
     }
+    exit(0);
 }
 
 std::pair<int, int> GameClient::parse(const std::string & msg) {
     int x = 0, y = 0;
-    int i = 1;
+    int i = 3;
     while (i < msg.size() && msg[i] != ':') {
         x = x * 10 + msg[i] - '0';
         i++;
@@ -117,4 +161,10 @@ std::pair<int, int> GameClient::parse(const std::string & msg) {
         i++;
     }
     return {x, y};
+}
+
+void GameClient::send(char op) {
+    int window = myself_->window();
+    Model model = myself_->model();
+    client_.send(std::to_string(window) + std::to_string(model) + op + "\r\n\r\n");
 }

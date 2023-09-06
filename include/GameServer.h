@@ -26,11 +26,12 @@ private:
     void onConnection(const std::shared_ptr<TcpConnection>&);
     void onMessage(const std::shared_ptr<TcpConnection>&, Buffer*);
     bool move(Player&, char) const;
-    char newPlayer();
+    int newPlayer();
     size_t marks_;
     std::vector<char> tags_;
-    std::unordered_map<char, Player> players_;
+    std::unordered_map<int, Player> players_;
     std::set<NonPlayer> nonPlayers_;
+    std::vector<std::string> allCommands_;
 };
 
 #endif //GAME_GAMESERVER_H

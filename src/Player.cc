@@ -3,40 +3,51 @@
 //
 #include "Player.h"
 
-const int DEFAULT_LINES = 30;
-const int DEFAULT_COLS = 50;
-
-Player::Player() : x_(1), y_(1), tag_('0'), up_(1), down_(DEFAULT_LINES), left_(1), right_(DEFAULT_COLS) {
+Player::Player() : x_(1), y_(1), tag_('.') {
 
 }
 
-Player::Player(int x, int y, char tag) : x_(x), y_(y), tag_(tag), up_(1), down_(DEFAULT_LINES - 2), left_(1), right_(DEFAULT_COLS - 2) {
+Player::Player(int x, int y, char tag, int window, Model model) : x_(x), y_(y), tag_(tag),
+                                                    window_(window), model_(model) {
 
 }
 
-Player::Player(int x, int y, char tag, int lines, int cols) : x_(x), y_(y), tag_(tag), up_(1), down_(lines - 2), left_(1), right_(cols - 2) {
+Player::Player(int x, int y, char tag, int window, Model model, int lines, int cols) : x_(x), y_(y), tag_(tag),
+                                                                          window_(window), model_(model) {
 
 }
 
 bool Player::move(char op) {
     switch (op) {
+        case 'i': {
+            model_ = Insert;
+            break;
+        }
+        case 'c': {
+            model_ = Clean;
+            break;
+        }
+        case 'l': {
+            model_ = Look;
+            break;
+        }
         case 'w': {
-            if (x_ <= up_) return false;
+            if (x_ <= up) return false;
             x_--;
             break;
         }
         case 's': {
-            if (x_ >= down_) return false;
+            if (x_ >= down) return false;
             x_++;
             break;
         }
         case 'a': {
-            if (y_ <= left_) return false;
+            if (y_ <= left) return false;
             y_--;
             break;
         }
         case 'd': {
-            if (y_ >= right_) return false;
+            if (y_ >= right) return false;
             y_++;
             break;
         }
@@ -44,4 +55,15 @@ bool Player::move(char op) {
             return false;
     }
     return true;
+}
+
+std::string Player::String() {
+    std::string str;
+    str.append(std::to_string(window_));
+    str.append(std::to_string(model_));
+    str.append(std::string(1, tag_));
+    str.append(std::to_string(x()));
+    str.append(":");
+    str.append(std::to_string(y()));
+    return str;
 }

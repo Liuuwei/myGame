@@ -5,28 +5,37 @@
 #ifndef GAME_PLAYER_H
 #define GAME_PLAYER_H
 
-extern const int DEFAULT_LINES;
-extern const int DEFAULT_COLS;
+#include "Util.h"
+
+#include <ncurses.h>
+
+#include <vector>
+#include <string>
 
 class Player {
 public:
     Player();
-    Player(int x, int y, char tag);
-    Player(int x, int y, char tag, int lines, int cols);
+    Player(int x, int y, char tag, int window, Model model);
+    Player(int x, int y, char tag, int window, Model model, int lines, int cols);
     [[nodiscard]] int x() const { return x_; }
     [[nodiscard]] int y() const { return y_; }
     [[nodiscard]] char tag() const { return tag_; }
+    [[nodiscard]] Model model() const { return model_; }
+    [[nodiscard]] int window() const { return window_; }
     void setX(int x) { x_ = x; }
     void setY(int y) { y_ = y; }
+    void setModel(Model model) { model_ = model; }
+    void setTag(char tag) { tag_ = tag; }
+    void setWindow(int window) { window_ = window; }
     bool move(char op);
+    void show();
+    std::string String();
 private:
     int x_;
     int y_;
-    char tag_;
-    int up_;
-    int down_;
-    int left_;
-    int right_;
+    char tag_; // 玩家符号
+    int window_; // 属于哪个窗口
+    Model model_; // 当前模式: Insert | Clean | Look
 };
 
 #endif //GAME_PLAYER_H

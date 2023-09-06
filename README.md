@@ -31,4 +31,4 @@ ncurses库
 ```  
 
 ## 展示  
-![](http://6iu5ei.com/gameshow.jpg)
+![](/Users/liuwei/CLionProjects/game/show/gameshow.jpg)

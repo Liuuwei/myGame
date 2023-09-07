@@ -39,7 +39,6 @@ void GameClient::start() {
 }
 
 void GameClient::onConnection(const std::shared_ptr<TcpConnection> &conn) {
-    start_.acquire();
     move();
 }
 
@@ -63,12 +62,6 @@ void GameClient::onMessage(const std::shared_ptr<TcpConnection> & conn, Buffer *
         player.setX(x);
         player.setY(y);
         show(player);
-
-        static bool first = true;
-        if (first) {
-            start_.release();
-            first = false;
-        }
     }
 }
 

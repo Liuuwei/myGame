@@ -6,9 +6,7 @@
 
 GameServer::GameServer(EventLoop *loop, const InetAddr& addr) :loop_(loop), server_(loop_, addr),
                         tags_(26), marks_(0), lines_(30), cols_(50) {
-    for (int i = 0; i < 26; i++) {
-        tags_[i] = i + 'a';
-    }
+
 }
 
 void GameServer::start() {
@@ -46,6 +44,7 @@ void GameServer::onMessage(const std::shared_ptr<TcpConnection> &conn, Buffer *b
     int n = -1;
     while ( (n = buffer->FindEnd()) != -1) {
         std::string msg = buffer->retriveSome(n - buffer->readIndex() + 1);
+        std::cout << msg << std::endl;
         char op = msg[0];
         auto& curPlayer = players_[conn->fd()];
         if (move(curPlayer, op)) {

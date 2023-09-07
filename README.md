@@ -44,4 +44,4 @@ WASD移动，I绘画模式，C橡皮擦模式，L观察模式
 ```  
 
 ## 展示
-![](https://github.com/Liuuwei/myGame/blob/main/show/gameshow.jpg?raw=true)
+![](https://github.com/Liuuwei/myGame/blob/main/show/picture.jpg?raw=true)

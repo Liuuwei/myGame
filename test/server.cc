@@ -4,6 +4,7 @@
 #include "GameServer.h"
 
 int main() {
+    Log::Instance()->close();
     EventLoop loop;
     InetAddr addr("10.211.55.3", 7777);
     GameServer server(&loop, addr);

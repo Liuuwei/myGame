@@ -5,7 +5,7 @@
 
 int main() {
     EventLoop loop;
-    GameClient client(&loop, "10.211.55.3", 7777);
+    GameClient client(&loop, "123.60.6.179", 7777);
     client.start();
     loop.loop();
 }

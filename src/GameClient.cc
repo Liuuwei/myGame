@@ -66,71 +66,33 @@ void GameClient::onMessage(const std::shared_ptr<TcpConnection> & conn, Buffer *
 }
 
 void GameClient::show(const Player& player) {
-    int window = player.window();
-    char tag = player.tag();
-    Model model = player.model();
-    int x = player.x();
-    int y = player.y();
-
-    switch (model) {
+    switch (player.model()) {
         case Insert: {
-            mvwaddch(windows_[window], x, y, tag);
+            mvwaddch(windows_[player.window()], player.x(), player.y(), player.conversion(player.tag()));
             break;
         }
         case Clean: {
-            mvwaddch(windows_[window], x, y, ' ');
+            mvwaddch(windows_[player.window()], player.x(), player.y(), ' ');
             break;
         }
         case Look: {
-            wmove(windows_[window], x, y);
+            wmove(windows_[player.window()], player.x(), player.y());
             break;
         }
         default: {
             break;
         }
     }
-    box(windows_[window], ACS_VLINE, ACS_HLINE);
-    wrefresh(windows_[window]);
+    box(windows_[player.window()], ACS_VLINE, ACS_HLINE);
+    wrefresh(windows_[player.window()]);
 }
 
 void GameClient::move() {
     int key;
     while ((key = getch()) != KEY_F(1)) {
-        char op;
-        switch (key) {
-            case 'i': {
-                op = 'i';
-                break;
-            }
-            case 'c': {
-                op = 'c';
-                break;
-            }
-            case 'l': {
-                op = 'l';
-                break;
-            }
-            case 'w': {
-                op = 'w';
-                break;
-            }
-            case 's': {
-                op = 's';
-                break;
-            }
-            case 'a': {
-                op = 'a';
-                break;
-            }
-            case 'd': {
-                op = 'd';
-                break;
-            }
-            default: {
-                continue;
-            }
+        if (Player::support(static_cast<char>(key))) {
+            client_.send(std::string(1, static_cast<char>(key)) + "\r\n\r\n");
         }
-        client_.send(std::string(1, op) + "\r\n\r\n");
     }
     exit(0);
 }

@@ -6,7 +6,7 @@
 int main() {
     Log::Instance()->close();
     EventLoop loop;
-    InetAddr addr("10.211.55.3", 7777);
+    InetAddr addr("192.168.0.165", 7777);
     GameServer server(&loop, addr);
     server.start();
     loop.loop();

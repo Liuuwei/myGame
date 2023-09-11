@@ -51,6 +51,16 @@ bool Player::move(char op) {
             y_++;
             break;
         }
+        case '1': {
+            model_ = Insert;
+            tag_ = '1';
+            break;
+        }
+        case '2': {
+            model_ = Insert;
+            tag_ = '2';
+            break;
+        }
         default:
             return false;
     }
@@ -67,3 +77,25 @@ std::string Player::String() {
     str.append(std::to_string(y()));
     return str;
 }
+
+chtype Player::conversion(char tag) const {
+    switch (tag) {
+        case '1': {
+            return '.';
+        }
+        case '2': {
+            return ACS_CKBOARD;
+        }
+        default: {
+            return '.';
+        }
+    }
+}
+
+bool Player::support(char op) {
+    return support_.count(op);
+}
+
+std::unordered_set<char> Player::support_{'i', 'l', 'c',
+                                          'w', 'a', 's', 'd',
+                                          '1', '2'};

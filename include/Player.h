@@ -11,6 +11,7 @@
 
 #include <vector>
 #include <string>
+#include <unordered_set>
 
 class Player {
 public:
@@ -28,14 +29,16 @@ public:
     void setTag(char tag) { tag_ = tag; }
     void setWindow(int window) { window_ = window; }
     bool move(char op);
-    void show();
+    chtype conversion(char tag) const;
     std::string String();
+    static bool support(char op);
 private:
     int x_;
     int y_;
     char tag_; // 玩家符号
     int window_; // 属于哪个窗口
     Model model_; // 当前模式: Insert | Clean | Look
+    static std::unordered_set<char> support_;
 };
 
 #endif //GAME_PLAYER_H

@@ -3,6 +3,3 @@ target_link_libraries(client game)
 
 add_executable(server server.cc)
 target_link_libraries(server game)
-
-add_executable(test test.cc)
-target_link_libraries(test ncurses)
